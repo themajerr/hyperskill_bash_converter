@@ -2,6 +2,33 @@
 
 definitionRegex="^[a-zA-Z]+_to_[a-zA-Z]+$"
 conversionRateRegex="^-?[0-9]+\.?[0-9]*$"
+choiceRegex="^[0-3]$"
+quitRegex="^quit$"
+programLoop=1
+
+echo "Welcome to the Simple converter!"
+
+while [ $programLoop == 1 ]; do 
+	echo "Select an option"
+	echo "0. Type '0' or 'quit' to end program"
+	echo "1. Convert units"
+	echo "2. Add a definition"
+	echo "3. Delete a definition"
+	read userChoice
+	if [[ ! $userChoice =~ $choiceRegex ]] && [[ ! $userChoice =~ $quitRegex ]]; then
+		echo "Invalid option!"
+		continue
+	else
+		case $userChoice in
+			"quit"|"0")
+				echo "Goodbye!"
+				programLoop=0;;
+			"1"|"2"|"3")
+				echo "Not implemented!"
+		esac
+	fi
+done
+: '
 echo "Enter a definition:"
 read -a user_input
 inputLength="${#user_input[@]}"
@@ -18,3 +45,4 @@ if [[ "$definition" =~ $definitionRegex ]] && [[ "$conversionRate" =~ $conversio
 else
 	echo "The definition is incorrect!"
 fi
+'
