@@ -25,7 +25,40 @@ while [ $programLoop == 1 ]; do
 				programLoop=0
 				;;
 			"1")
-				echo "Not implemented!"
+				if [[ ! -e definitions.txt ]] || [[ ! -s definitions.txt ]]; then
+					echo "Please add a definition first!"				
+				else
+					echo "Type the line number to convert units or '0' to return"
+					linesAmount=$(wc -l < definitions.txt)
+					for i in $(seq 1 $linesAmount); do
+						echo "$i." $( cat definitions.txt | head --lines "$i" | tail --lines 1 )
+					done
+					mainConversionLoop=1
+					while [[ $mainConversionLoop == 1 ]]; do
+						read conversionChoiceLine
+						lineRegex="^[1-${linesAmount}]$"
+						if [[ $conversionChoiceLine == '0' ]]; then
+							mainConversionLoop=0
+						elif [[ ! $conversionChoiceLine =~ $lineRegex ]]; then
+							echo "Enter a valid line number!"
+						else 
+							chosenConversionRate=$(grep -o --extended-regexp '\-?[0-9]+.?[0-9]*' definitions.txt | head --lines "$conversionChoiceLine" | tail --lines 1)
+							echo "Enter a value to convert:"
+							conversionValueLoop=1
+							while [[ $conversionValueLoop == 1 ]]; do
+								read valueForConversion
+								if [[ ! $valueForConversion =~ $conversionRateRegex ]]; then
+									echo "Enter a float or integer value!"
+								else 
+									echo Result: $( bc -l <<< "$valueForConversion * $chosenConversionRate" )
+									conversionValueLoop=0
+								fi
+							done
+							mainConversionLoop=0
+							
+						fi
+					done
+				fi
 				;;
 			"2")
 				definitionLoop=1
