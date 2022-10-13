@@ -22,27 +22,52 @@ while [ $programLoop == 1 ]; do
 		case $userChoice in
 			"quit"|"0")
 				echo "Goodbye!"
-				programLoop=0;;
-			"1"|"2"|"3")
+				programLoop=0
+				;;
+			"1")
 				echo "Not implemented!"
+				;;
+			"2")
+				definitionLoop=1
+				while [[ $definitionLoop == 1 ]]; do
+					echo "Enter a definition:"
+					read -a user_input
+					inputLength="${#user_input[@]}"
+					definition=${user_input[0]}
+					conversionRate=${user_input[1]}
+					if [[ "$definition" =~ $definitionRegex ]] && [[ "$conversionRate" =~ $conversionRateRegex ]] && [[ "$inputLength" == 2 ]]; then
+						echo "$definition $conversionRate" >> definitions.txt
+						definitionLoop=0
+					else
+						echo "The definition is incorrect!"
+					fi
+				done
+				;;
+			"3")
+				if [[ ! -e definitions.txt ]] || [[ ! -s definitions.txt ]]; then
+					echo "Please add a definition first!"
+				else
+					echo "Type the line number to delete or '0' to return"
+					linesAmount=$(wc -l < definitions.txt)
+					for i in $(seq 1 $linesAmount); do
+						echo "$i." $( cat definitions.txt | head --lines "$i" | tail --lines 1 )
+					done
+					removeLoop=1
+					while [[ $removeLoop == 1 ]]; do
+						read lineToRemove
+						lineRegex="^[1-${linesAmount}]$"
+						if [[ $lineToRemove == '0' ]]; then
+							removeLoop=0
+						elif [[ ! $lineToRemove =~ $lineRegex ]]; then
+							echo "Enter a valid line number!"
+						else 
+							sed -i "${lineToRemove}d" "definitions.txt"
+							removeLoop=0
+							
+						fi
+					done
+				fi
+				continue
 		esac
 	fi
 done
-: '
-echo "Enter a definition:"
-read -a user_input
-inputLength="${#user_input[@]}"
-definition=${user_input[0]}
-conversionRate=${user_input[1]}
-if [[ "$definition" =~ $definitionRegex ]] && [[ "$conversionRate" =~ $conversionRateRegex ]] && [[ "$inputLength" == 2 ]]; then
-	echo "Enter a value to convert:"
-	read value
-	while [[ ! "$value" =~ $conversionRateRegex ]]; do
-		echo "Enter a float or integer value!"
-		read value
-	done
-	echo Result: $( bc -l <<< "$value * $conversionRate" ) 
-else
-	echo "The definition is incorrect!"
-fi
-'
